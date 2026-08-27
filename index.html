@@ -1,0 +1,958 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arc &amp; Angle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Karla:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #f3f5f4;
+    --surface: #ffffff;
+    --surface-2: #e9edec;
+    --ink: #182226;
+    --ink-soft: #4b5a5e;
+    --ink-faint: #8a9497;
+    --accent: #2e5eaa;
+    --accent-ink: #ffffff;
+    --accent-soft: #e4ebfa;
+    --amber: #b96a08;
+    --amber-soft: #fcecd6;
+    --correct: #187a41;
+    --correct-soft: #e2f5e9;
+    --incorrect: #b83636;
+    --incorrect-soft: #fbe8e7;
+    --border: #d6dbd9;
+    --grid-line: rgba(24, 34, 38, 0.05);
+    --shadow: 0 1px 2px rgba(24, 34, 38, 0.06), 0 8px 24px -12px rgba(24, 34, 38, 0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #14181a;
+      --surface: #1c2224;
+      --surface-2: #232b2d;
+      --ink: #edefee;
+      --ink-soft: #a9b4b3;
+      --ink-faint: #798584;
+      --accent: #8bacea;
+      --accent-ink: #10192b;
+      --accent-soft: #233250;
+      --amber: #eeab5b;
+      --amber-soft: #3a2a14;
+      --correct: #5cc98a;
+      --correct-soft: #163420;
+      --incorrect: #f1897f;
+      --incorrect-soft: #3a1a18;
+      --border: #313a3c;
+      --grid-line: rgba(237, 239, 238, 0.05);
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper: #14181a;
+    --surface: #1c2224;
+    --surface-2: #232b2d;
+    --ink: #edefee;
+    --ink-soft: #a9b4b3;
+    --ink-faint: #798584;
+    --accent: #8bacea;
+    --accent-ink: #10192b;
+    --accent-soft: #233250;
+    --amber: #eeab5b;
+    --amber-soft: #3a2a14;
+    --correct: #5cc98a;
+    --correct-soft: #163420;
+    --incorrect: #f1897f;
+    --incorrect-soft: #3a1a18;
+    --border: #313a3c;
+    --grid-line: rgba(237, 239, 238, 0.05);
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    background:
+      repeating-linear-gradient(0deg, var(--grid-line) 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(90deg, var(--grid-line) 0 1px, transparent 1px 32px),
+      var(--paper);
+    color: var(--ink);
+    font-family: 'Karla', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  .wrap { max-width: 640px; margin: 0 auto; padding: 40px 20px 80px; }
+
+  header.page-head { text-align: center; margin-bottom: 14px; }
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 2.1rem;
+    letter-spacing: -0.01em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h1 .amp { color: var(--accent); font-style: italic; }
+
+  .tagline {
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-top: 8px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 28px;
+  }
+
+  .card + .card { margin-top: 20px; }
+
+  .field-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faint);
+    margin: 0 0 10px;
+  }
+
+  .setup-group + .setup-group { margin-top: 22px; }
+
+  .choice-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  @media (min-width: 480px) { .choice-grid.topics { grid-template-columns: repeat(3, 1fr); } }
+
+  .choice-btn {
+    font-family: 'Karla', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1.5px solid transparent;
+    border-radius: 10px;
+    padding: 12px 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .choice-btn .sub {
+    display: block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 500;
+    font-size: 0.68rem;
+    color: var(--ink-faint);
+    margin-top: 3px;
+  }
+
+  .choice-btn:hover { border-color: var(--accent); }
+  .choice-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .choice-btn.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+  .choice-btn.active .sub { color: var(--accent); opacity: 0.85; }
+
+  .start-btn {
+    width: 100%;
+    margin-top: 26px;
+    font-family: 'Karla', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 15px;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+
+  .start-btn:hover { filter: brightness(1.08); }
+  .start-btn:active { transform: translateY(1px); }
+  .start-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--ink-soft);
+    margin-bottom: 14px;
+    padding: 0 2px;
+  }
+
+  .stat-row .pill { display: inline-flex; align-items: center; gap: 6px; }
+  .stat-row .pill.streak { color: var(--amber); }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin-bottom: 16px;
+    font-family: 'Karla', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink);
+    cursor: pointer;
+    box-shadow: var(--shadow);
+  }
+
+  .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .back-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .progress-track { height: 6px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin-bottom: 22px; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 4px; transition: width 0.3s ease; }
+
+  .problem-topic {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    margin: 0 0 16px;
+    text-align: center;
+  }
+
+  .diagram { width: 100%; height: auto; max-width: 260px; display: block; margin: 0 auto 18px; }
+  .circle-outline { fill: none; stroke: var(--ink-faint); stroke-width: 1.5; }
+  .chord-line { stroke: var(--ink); stroke-width: 2; fill: none; }
+  .tangent-line { stroke: var(--ink); stroke-width: 2; fill: none; }
+  .arc-highlight { fill: none; stroke: var(--accent); stroke-width: 4; stroke-linecap: round; }
+  .arc-highlight-2 { fill: none; stroke: var(--amber); stroke-width: 4; stroke-linecap: round; }
+  .angle-arc { fill: none; stroke: var(--correct); stroke-width: 2; }
+  .pt { fill: var(--ink); }
+  .pt-label { font-family: 'IBM Plex Mono', monospace; font-size: 14px; fill: var(--ink); }
+  .diagram-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; fill: var(--ink-soft); }
+  .diagram-label-accent { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; fill: var(--accent); }
+  .diagram-label-amber { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; fill: var(--amber); }
+
+  .problem-text {
+    font-family: 'Karla', sans-serif;
+    font-weight: 600;
+    font-size: 1.08rem;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 0 0 22px;
+    text-align: center;
+  }
+
+  .problem-text .mono { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+
+  .answer-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; }
+
+  .answer-form input[type="text"] {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.1rem;
+    font-variant-numeric: tabular-nums;
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--ink);
+    padding: 12px 14px;
+    width: 130px;
+    text-align: center;
+  }
+
+  .answer-form input[type="text"]:focus-visible {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .answer-form input[disabled] { opacity: 0.7; }
+
+  .submit-btn {
+    font-family: 'Karla', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 22px;
+    cursor: pointer;
+    transition: filter 0.15s ease;
+  }
+
+  .submit-btn:hover { filter: brightness(1.08); }
+  .submit-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .submit-btn:disabled { opacity: 0.5; cursor: default; }
+
+  .feedback { margin-top: 20px; border-radius: 10px; padding: 16px 18px; display: none; }
+  .feedback.show { display: block; }
+  .feedback.correct { background: var(--correct-soft); border: 1.5px solid color-mix(in srgb, var(--correct) 40%, transparent); }
+  .feedback.incorrect { background: var(--incorrect-soft); border: 1.5px solid color-mix(in srgb, var(--incorrect) 40%, transparent); }
+
+  .feedback-headline { font-family: 'Karla', sans-serif; font-weight: 700; font-size: 1rem; margin: 0 0 6px; }
+  .feedback.correct .feedback-headline { color: var(--correct); }
+  .feedback.incorrect .feedback-headline { color: var(--incorrect); }
+
+  .feedback-explain { font-family: 'Karla', sans-serif; font-size: 0.88rem; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+  .feedback-explain .mono { font-family: 'IBM Plex Mono', monospace; }
+
+  .next-btn {
+    margin-top: 16px;
+    width: 100%;
+    font-family: 'Karla', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 22px;
+    cursor: pointer;
+  }
+
+  .next-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .next-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .summary-title { font-family: 'Fraunces', Georgia, serif; font-weight: 600; font-size: 1.6rem; margin: 0 0 6px; text-wrap: balance; }
+  .summary-sub { color: var(--ink-soft); margin: 0 0 26px; font-size: 0.95rem; }
+
+  .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 28px; }
+  .summary-stat { background: var(--surface-2); border-radius: 10px; padding: 16px 10px; text-align: center; }
+  .summary-stat .val { font-family: 'IBM Plex Mono', monospace; font-weight: 600; font-size: 1.5rem; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .summary-stat .lbl { font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-faint); margin-top: 4px; }
+
+  .summary-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .summary-actions button { flex: 1 1 180px; }
+
+  .ghost-btn {
+    font-family: 'Karla', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--ink);
+    background: transparent;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    cursor: pointer;
+  }
+
+  .ghost-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .ghost-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .hidden { display: none !important; }
+
+  footer.note {
+    text-align: center;
+    margin-top: 30px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-faint);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page-head">
+    <h1>Arc <span class="amp">&amp;</span> Angle</h1>
+    <p class="tagline">circle theorems practice — chapter 10.4 &amp; 10.5</p>
+  </header>
+
+  <!-- SETUP SCREEN -->
+  <section class="card" id="setup-screen">
+    <div class="setup-group">
+      <p class="field-label">Focus</p>
+      <div class="choice-grid topics" id="topic-grid" role="group" aria-label="Topic">
+        <button type="button" class="choice-btn active" data-topic="mixed">Mixed<span class="sub">all seven types</span></button>
+        <button type="button" class="choice-btn" data-topic="inscribed">Inscribed Angles<span class="sub">Thm 10.7</span></button>
+        <button type="button" class="choice-btn" data-topic="congruent">Congruent Angles<span class="sub">same arc</span></button>
+        <button type="button" class="choice-btn" data-topic="semicircle">Semicircle<span class="sub">right angles</span></button>
+        <button type="button" class="choice-btn" data-topic="quadrilateral">Inscribed Quad.<span class="sub">opposite angles</span></button>
+        <button type="button" class="choice-btn" data-topic="tangentchord">Tangent–Chord<span class="sub">Thm 10.11</span></button>
+        <button type="button" class="choice-btn" data-topic="chords">Chords Inside<span class="sub">intersecting chords</span></button>
+        <button type="button" class="choice-btn" data-topic="tangents">Tangents Outside<span class="sub">external point</span></button>
+      </div>
+    </div>
+
+    <button type="button" class="start-btn" id="start-btn">Start practice — 12 problems</button>
+  </section>
+
+  <!-- PRACTICE SCREEN -->
+  <section class="hidden" id="practice-screen">
+    <button type="button" class="back-btn" id="menu-btn">← Back to menu</button>
+    <div class="stat-row">
+      <span class="pill" id="progress-label">Problem 1 of 12</span>
+      <span class="pill">Score <strong id="score-label" style="color:var(--ink); margin-left:4px;">0</strong></span>
+      <span class="pill streak" id="streak-label">🔥 0</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+
+    <div class="card">
+      <p class="problem-topic" id="problem-topic-label">Inscribed Angles</p>
+      <div id="diagram-holder"></div>
+      <p class="problem-text" id="problem-text">—</p>
+
+      <form class="answer-form" id="answer-form" autocomplete="off">
+        <input type="text" id="answer-input" inputmode="numeric" placeholder="answer" aria-label="Answer">
+        <button type="submit" class="submit-btn" id="submit-btn">Check</button>
+      </form>
+
+      <div class="feedback" id="feedback" role="status" aria-live="polite">
+        <p class="feedback-headline" id="feedback-headline"></p>
+        <p class="feedback-explain" id="feedback-explain"></p>
+      </div>
+
+      <button type="button" class="next-btn hidden" id="next-btn">Next problem →</button>
+    </div>
+  </section>
+
+  <!-- SUMMARY SCREEN -->
+  <section class="hidden" id="summary-screen">
+    <div class="card">
+      <p class="summary-title" id="summary-title">Round complete</p>
+      <p class="summary-sub" id="summary-sub"></p>
+
+      <div class="summary-grid">
+        <div class="summary-stat"><div class="val" id="summary-score">0/12</div><div class="lbl">Score</div></div>
+        <div class="summary-stat"><div class="val" id="summary-accuracy">0%</div><div class="lbl">Accuracy</div></div>
+        <div class="summary-stat"><div class="val" id="summary-time">0:00</div><div class="lbl">Time</div></div>
+      </div>
+
+      <div class="summary-actions">
+        <button type="button" class="start-btn" id="again-btn" style="margin-top:0;">Practice again</button>
+        <button type="button" class="ghost-btn" id="change-btn">Change focus</button>
+      </div>
+    </div>
+  </section>
+
+  <footer class="note">12 problems per round · fresh diagrams every time · good luck tomorrow</footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- basic helpers ----------
+
+  function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function randEven(min, max) { var v = randInt(min, max); if (v % 2 !== 0) v += 1; if (v > max) v -= 2; return v; }
+  function pick(arr) { return arr[randInt(0, arr.length - 1)]; }
+  function fmtSign(v) { return v < 0 ? ('− ' + Math.abs(v)) : ('+ ' + v); }
+
+  // ---------- geometry / SVG helpers ----------
+
+  var CX = 160, CY = 160, R = 90;
+
+  function ptOnCircle(cx, cy, r, angleDeg) {
+    var a = angleDeg * Math.PI / 180;
+    return { x: cx + r * Math.sin(a), y: cy - r * Math.cos(a) };
+  }
+  function polarAt(angleDeg) { return ptOnCircle(CX, CY, R, angleDeg); }
+
+  function angleOfVec(dx, dy) {
+    var deg = Math.atan2(dx, -dy) * 180 / Math.PI;
+    return (deg + 360) % 360;
+  }
+
+  function describeArc(cx, cy, r, startDeg, endDeg) {
+    var s = ptOnCircle(cx, cy, r, startDeg), e = ptOnCircle(cx, cy, r, endDeg);
+    var diff = ((endDeg - startDeg) % 360 + 360) % 360;
+    var largeArc = diff > 180 ? 1 : 0;
+    return 'M ' + s.x.toFixed(2) + ' ' + s.y.toFixed(2) + ' A ' + r + ' ' + r + ' 0 ' + largeArc + ' 1 ' + e.x.toFixed(2) + ' ' + e.y.toFixed(2);
+  }
+
+  function smallAngleArcPath(vertex, p1, p2, r) {
+    var a1 = angleOfVec(p1.x - vertex.x, p1.y - vertex.y);
+    var a2 = angleOfVec(p2.x - vertex.x, p2.y - vertex.y);
+    var diff = ((a2 - a1) % 360 + 360) % 360;
+    if (diff > 180) { var t = a1; a1 = a2; a2 = t; diff = 360 - diff; }
+    return describeArc(vertex.x, vertex.y, r, a1, a2);
+  }
+
+  function lineIntersect(p1, p2, p3, p4) {
+    var d = (p1.x - p2.x) * (p3.y - p4.y) - (p1.y - p2.y) * (p3.x - p4.x);
+    if (Math.abs(d) < 1e-9) return { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+    var t = ((p1.x - p3.x) * (p3.y - p4.y) - (p1.y - p3.y) * (p3.x - p4.x)) / d;
+    return { x: p1.x + t * (p2.x - p1.x), y: p1.y + t * (p2.y - p1.y) };
+  }
+
+  function normDir(vertex, p) {
+    var dx = p.x - vertex.x, dy = p.y - vertex.y, len = Math.sqrt(dx * dx + dy * dy);
+    return { x: dx / len, y: dy / len };
+  }
+
+  function svgOpen() { return '<svg viewBox="0 0 320 320" class="diagram" xmlns="http://www.w3.org/2000/svg">'; }
+  function circleTag() { return '<circle class="circle-outline" cx="' + CX + '" cy="' + CY + '" r="' + R + '"/>'; }
+  function line(p1, p2, cls) { return '<line class="' + (cls || 'chord-line') + '" x1="' + p1.x.toFixed(2) + '" y1="' + p1.y.toFixed(2) + '" x2="' + p2.x.toFixed(2) + '" y2="' + p2.y.toFixed(2) + '"/>'; }
+  function dot(p) { return '<circle class="pt" cx="' + p.x.toFixed(2) + '" cy="' + p.y.toFixed(2) + '" r="3.5"/>'; }
+  function labelAt(p, text, dirDeg, dist, cls) {
+    dist = dist || 18;
+    var lp = ptOnCircle(p.x, p.y, dist, dirDeg);
+    return '<text class="' + (cls || 'pt-label') + '" x="' + lp.x.toFixed(2) + '" y="' + lp.y.toFixed(2) + '" text-anchor="middle" dominant-baseline="middle">' + text + '</text>';
+  }
+  function arcHi(startDeg, endDeg, cls) { return '<path class="' + (cls || 'arc-highlight') + '" d="' + describeArc(CX, CY, R, startDeg, endDeg) + '"/>'; }
+  function arcLabel(startDeg, endDeg, text, cls) {
+    var mid = startDeg + (((endDeg - startDeg) % 360 + 360) % 360) / 2;
+    var lp = ptOnCircle(CX, CY, R - 24, mid);
+    return '<text class="' + (cls || 'diagram-label-accent') + '" x="' + lp.x.toFixed(2) + '" y="' + lp.y.toFixed(2) + '" text-anchor="middle" dominant-baseline="middle">' + text + '</text>';
+  }
+  function smallAngleMark(vertex, p1, p2, text, dist) {
+    dist = dist || 34;
+    var out = '<path class="angle-arc" d="' + smallAngleArcPath(vertex, p1, p2, 20) + '"/>';
+    var a1 = angleOfVec(p1.x - vertex.x, p1.y - vertex.y), a2 = angleOfVec(p2.x - vertex.x, p2.y - vertex.y);
+    var diff = ((a2 - a1) % 360 + 360) % 360;
+    if (diff > 180) { var t = a1; a1 = a2; a2 = t; diff = 360 - diff; }
+    var bis = a1 + diff / 2;
+    out += labelAt(vertex, text, bis, dist, 'diagram-label-accent');
+    return out;
+  }
+  function rightAngleMarker(vertex, p1, p2, size) {
+    size = size || 13;
+    var u1 = normDir(vertex, p1), u2 = normDir(vertex, p2);
+    var c1 = { x: vertex.x + u1.x * size, y: vertex.y + u1.y * size };
+    var c3 = { x: vertex.x + u2.x * size, y: vertex.y + u2.y * size };
+    var c2 = { x: c1.x + u2.x * size, y: c1.y + u2.y * size };
+    return '<polyline class="angle-arc" points="' + c1.x.toFixed(2) + ',' + c1.y.toFixed(2) + ' ' + c2.x.toFixed(2) + ',' + c2.y.toFixed(2) + ' ' + c3.x.toFixed(2) + ',' + c3.y.toFixed(2) + '" fill="none"/>';
+  }
+
+  // ---------- problem generators ----------
+
+  function genInscribed() {
+    var m = randEven(60, 150);
+    var A = polarAt(0), B = polarAt(m);
+    var Dangle = (m + 360) / 2;
+    var D = polarAt(Dangle);
+    var askAngle = Math.random() < 0.5;
+    var angleVal = m / 2;
+
+    var svg = svgOpen() + circleTag() + arcHi(0, m) + line(D, A) + line(D, B) +
+      dot(A) + dot(B) + dot(D) +
+      labelAt(A, 'A', 0) + labelAt(B, 'B', m) + labelAt(D, 'D', Dangle) +
+      smallAngleMark(D, A, B, askAngle ? '?' : angleVal + '°') +
+      arcLabel(0, m, askAngle ? m + '°' : '?') +
+      '</svg>';
+
+    var prompt = askAngle
+      ? 'Arc AB measures ' + m + '°. Find m∠ADB.'
+      : 'm∠ADB = ' + angleVal + '°. Find the measure of arc AB.';
+    var answer = askAngle ? angleVal : m;
+    var explain = 'Inscribed Angle Theorem (10.7): an inscribed angle is half its intercepted arc. m∠ADB = ½ · m⌒AB = ½ · ' + m + '° = ' + angleVal + '°.';
+
+    return { topic: 'Inscribed Angles', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  function genCongruent() {
+    var m = randEven(50, 140);
+    var A = polarAt(0), B = polarAt(m);
+    var majorSpan = 360 - m;
+    var D1angle = m + majorSpan * 0.32;
+    var D2angle = m + majorSpan * 0.72;
+    var D1 = polarAt(D1angle), D2 = polarAt(D2angle);
+    var target = m / 2;
+
+    var svg = svgOpen() + circleTag() + arcHi(0, m) +
+      line(D1, A) + line(D1, B) + line(D2, A) + line(D2, B) +
+      dot(A) + dot(B) + dot(D1) + dot(D2) +
+      labelAt(A, 'A', 0) + labelAt(B, 'B', m) + labelAt(D1, 'D₁', D1angle) + labelAt(D2, 'D₂', D2angle);
+
+    var algebraic = Math.random() < 0.5;
+    var prompt, answer, explain;
+
+    if (!algebraic) {
+      svg += smallAngleMark(D1, A, B, target + '°') + smallAngleMark(D2, A, B, '?');
+      prompt = 'm∠AD₁B = ' + target + '°. Both ∠AD₁B and ∠AD₂B intercept arc AB. Find m∠AD₂B.';
+      answer = target;
+      explain = 'Two inscribed angles that intercept the same arc are congruent, so m∠AD₂B = m∠AD₁B = ' + target + '°.';
+    } else {
+      var x = randInt(4, 14);
+      var a1 = pick([2, 3, 4]), a2 = pick([2, 3, 4].filter(function (v) { return v !== a1; }));
+      var b1 = target - a1 * x;
+      var b2 = target - a2 * x;
+      svg += smallAngleMark(D1, A, B, '(' + a1 + 'x ' + fmtSign(b1) + ')°') + smallAngleMark(D2, A, B, '(' + a2 + 'x ' + fmtSign(b2) + ')°');
+      prompt = 'm∠AD₁B = (' + a1 + 'x ' + fmtSign(b1) + ')°, m∠AD₂B = (' + a2 + 'x ' + fmtSign(b2) + ')°. Both intercept arc AB. Find x.';
+      answer = x;
+      explain = 'Same intercepted arc → the angles are congruent: ' + a1 + 'x ' + fmtSign(b1) + ' = ' + a2 + 'x ' + fmtSign(b2) + '  →  x = ' + x + '.';
+    }
+
+    svg += '</svg>';
+    return { topic: 'Congruent Angles', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  function genSemicircle() {
+    var m = randInt(20, 70);
+    var Dangle = 180 - 2 * m;
+    var A = polarAt(0), B = polarAt(180), D = polarAt(Dangle);
+
+    var svg = svgOpen() + circleTag() +
+      line(A, B) + line(A, D) + line(B, D) +
+      rightAngleMarker(D, A, B) +
+      dot(A) + dot(B) + dot(D) +
+      labelAt(A, 'A', 0) + labelAt(B, 'B', 180) + labelAt(D, 'D', Dangle) +
+      smallAngleMark(A, D, B, m + '°', 26) + smallAngleMark(B, A, D, '?', 26) +
+      '</svg>';
+
+    var prompt = 'AB is a diameter. m∠A = ' + m + '°. Find m∠B.';
+    var answer = 90 - m;
+    var explain = 'AB is a diameter, so ∠ADB is inscribed in a semicircle and measures 90°. Triangle angles sum to 180°, so m∠B = 180° − 90° − ' + m + '° = ' + (90 - m) + '°.';
+
+    return { topic: 'Semicircle', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  function genQuadrilateral() {
+    var raw = [randInt(50, 110), randInt(50, 110), randInt(50, 110), randInt(50, 110)];
+    var sum = raw[0] + raw[1] + raw[2] + raw[3];
+    var scaled = raw.map(function (v) { return Math.round(v * 360 / sum); });
+    var diff = 360 - (scaled[0] + scaled[1] + scaled[2] + scaled[3]);
+    scaled[3] += diff;
+
+    var aAng = 0, bAng = scaled[0], cAng = scaled[0] + scaled[1], dAng = scaled[0] + scaled[1] + scaled[2];
+    var A = polarAt(aAng), B = polarAt(bAng), C = polarAt(cAng), D = polarAt(dAng);
+
+    var svg = svgOpen() + circleTag() +
+      line(A, B) + line(B, C) + line(C, D) + line(D, A) +
+      dot(A) + dot(B) + dot(C) + dot(D) +
+      labelAt(A, 'A', aAng) + labelAt(B, 'B', bAng) + labelAt(C, 'C', cAng) + labelAt(D, 'D', dAng);
+
+    var algebraic = Math.random() < 0.5;
+    var prompt, answer, explain;
+
+    if (!algebraic) {
+      var angleA = randInt(60, 150);
+      var angleC = 180 - angleA;
+      svg += labelAt(A, angleA + '°', aAng, 34, 'diagram-label-accent') + labelAt(C, '?', cAng, 34, 'diagram-label-accent');
+      prompt = 'ABCD is inscribed in the circle. m∠A = ' + angleA + '°. Find m∠C.';
+      answer = angleC;
+      explain = 'Opposite angles of an inscribed quadrilateral are supplementary: m∠A + m∠C = 180°, so m∠C = 180° − ' + angleA + '° = ' + angleC + '°.';
+    } else {
+      var x = randInt(5, 20);
+      var a = pick([2, 3, 4]), c = pick([3, 4, 5]);
+      var b = randInt(-8, 12);
+      var d = 180 - (a + c) * x - b;
+      svg += labelAt(A, '(' + a + 'x ' + fmtSign(b) + ')°', aAng, 38, 'diagram-label-accent') + labelAt(C, '(' + c + 'x ' + fmtSign(d) + ')°', cAng, 38, 'diagram-label-accent');
+      prompt = 'ABCD is inscribed in the circle. m∠A = (' + a + 'x ' + fmtSign(b) + ')°, m∠C = (' + c + 'x ' + fmtSign(d) + ')°. Find x.';
+      answer = x;
+      explain = 'Opposite angles are supplementary: (' + a + 'x ' + fmtSign(b) + ') + (' + c + 'x ' + fmtSign(d) + ') = 180  →  x = ' + x + '.';
+    }
+
+    svg += '</svg>';
+    return { topic: 'Inscribed Quadrilateral', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  function genTangentChord() {
+    var m = randEven(50, 150);
+    var T = polarAt(0), B = polarAt(m);
+    var Tleft = { x: T.x - 75, y: T.y }, Tright = { x: T.x + 75, y: T.y };
+    var askAngle = Math.random() < 0.5;
+    var angleVal = m / 2;
+
+    var svg = svgOpen() + circleTag() + arcHi(0, m) +
+      line(Tleft, Tright, 'tangent-line') + line(T, B) +
+      dot(T) + dot(B) +
+      labelAt(T, 'T', 180, 16) + labelAt(B, 'B', m) +
+      smallAngleMark(T, Tright, B, askAngle ? '?' : angleVal + '°', 30) +
+      arcLabel(0, m, askAngle ? m + '°' : '?') +
+      '</svg>';
+
+    var prompt = askAngle
+      ? 'Line through T is tangent to the circle. Arc TB measures ' + m + '°. Find the tangent–chord angle at T.'
+      : 'Line through T is tangent to the circle. The tangent–chord angle at T measures ' + angleVal + '°. Find the measure of arc TB.';
+    var answer = askAngle ? angleVal : m;
+    var explain = 'Tangent–Chord Angle Theorem (10.11): the angle equals half its intercepted arc. Angle = ½ · m⌒TB = ½ · ' + m + '° = ' + angleVal + '°.';
+
+    return { topic: 'Tangent–Chord', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  function genChordsInside() {
+    var m1, m2, g1, g2, tries = 0;
+    do {
+      m1 = randEven(30, 100); m2 = randEven(30, 100); g1 = randInt(40, 80);
+      g2 = 360 - m1 - g1 - m2;
+      tries++;
+    } while ((g2 < 30 || g2 > 110) && tries < 30);
+    if (g2 < 30) g2 = 30;
+
+    var aAng = 0, bAng = m1, cAng = m1 + g1, dAng = m1 + g1 + m2;
+    var A = polarAt(aAng), B = polarAt(bAng), C = polarAt(cAng), D = polarAt(dAng);
+    var P = lineIntersect(A, C, B, D);
+
+    var svg = svgOpen() + circleTag() + arcHi(aAng, bAng) + arcHi(cAng, dAng, 'arc-highlight-2') +
+      line(A, C) + line(B, D) +
+      dot(A) + dot(B) + dot(C) + dot(D) +
+      labelAt(A, 'A', aAng) + labelAt(B, 'B', bAng) + labelAt(C, 'C', cAng) + labelAt(D, 'D', dAng) +
+      arcLabel(aAng, bAng, m1 === undefined ? '?' : m1 + '°') +
+      arcLabel(cAng, dAng, m2 + '°', 'diagram-label-amber');
+
+    var angleVal = (m1 + m2) / 2;
+    var findAngle = Math.random() < 0.5;
+    var prompt, answer, explain;
+
+    if (findAngle) {
+      svg += smallAngleMark(P, A, B, '?');
+      prompt = 'Chords AC and BD intersect inside the circle. Arc AB = ' + m1 + '°, arc CD = ' + m2 + '°. Find m∠APB.';
+      answer = angleVal;
+      explain = 'Two Chords Theorem (10.12): the angle equals half the sum of the intercepted arcs. m∠APB = ½(' + m1 + '° + ' + m2 + '°) = ' + angleVal + '°.';
+    } else {
+      svg += smallAngleMark(P, A, B, angleVal + '°');
+      prompt = 'Chords AC and BD intersect inside the circle. m∠APB = ' + angleVal + '°, arc AB = ' + m1 + '°. Find arc CD.';
+      answer = m2;
+      explain = 'Two Chords Theorem (10.12): m∠APB = ½(arc AB + arc CD). ' + angleVal + ' = ½(' + m1 + '° + arc CD)  →  arc CD = ' + m2 + '°.';
+    }
+
+    svg += '</svg>';
+    return { topic: 'Chords Inside the Circle', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  function genTangentsOutside() {
+    var m = randInt(40, 100);
+    var A = polarAt(0), B = polarAt(m);
+    var half = m / 2;
+    var opDist = R / Math.cos(half * Math.PI / 180);
+    var P = ptOnCircle(CX, CY, opDist, half);
+    var majorVal = 360 - m;
+    var angleVal = 180 - m;
+
+    var svg = svgOpen() + circleTag() + arcHi(0, m) + arcHi(m, 360, 'arc-highlight-2') +
+      line(A, P, 'tangent-line') + line(B, P, 'tangent-line') +
+      dot(A) + dot(B) + dot(P) +
+      labelAt(A, 'A', 0) + labelAt(B, 'B', m) + labelAt(P, 'P', half, 20) +
+      arcLabel(0, m, m + '°') +
+      arcLabel(m, 360, majorVal + '°', 'diagram-label-amber');
+
+    var findAngle = Math.random() < 0.5;
+    var prompt, answer, explain;
+
+    if (findAngle) {
+      svg += smallAngleMark(P, A, B, '?', 22);
+      prompt = 'PA and PB are tangent to the circle. Minor arc AB = ' + m + '°, major arc AB = ' + majorVal + '°. Find m∠P.';
+      answer = angleVal;
+      explain = 'External Angle Theorem (10.13): the angle equals half the difference of the intercepted arcs. m∠P = ½(' + majorVal + '° − ' + m + '°) = ' + angleVal + '°.';
+    } else {
+      svg += smallAngleMark(P, A, B, angleVal + '°', 22);
+      prompt = 'PA and PB are tangent to the circle. m∠P = ' + angleVal + '°, minor arc AB = ' + m + '°. Find the major arc AB.';
+      answer = majorVal;
+      explain = 'External Angle Theorem (10.13): m∠P = ½(major − minor). ' + angleVal + ' = ½(major − ' + m + '°)  →  major arc AB = ' + majorVal + '°.';
+    }
+
+    svg += '</svg>';
+    return { topic: 'Tangents from a Point', svg: svg, prompt: prompt, answer: answer, explain: explain };
+  }
+
+  var GENERATORS = {
+    inscribed: genInscribed,
+    congruent: genCongruent,
+    semicircle: genSemicircle,
+    quadrilateral: genQuadrilateral,
+    tangentchord: genTangentChord,
+    chords: genChordsInside,
+    tangents: genTangentsOutside
+  };
+  var TOPIC_KEYS = ['inscribed', 'congruent', 'semicircle', 'quadrilateral', 'tangentchord', 'chords', 'tangents'];
+
+  function generateProblem(topic) {
+    var key = topic === 'mixed' ? pick(TOPIC_KEYS) : topic;
+    return GENERATORS[key]();
+  }
+
+  // ---------- encouragement ----------
+
+  var ENCOURAGEMENTS = [
+    "Nice work — that's exactly right.",
+    "Yes! You've got this theorem down.",
+    "Correct — that's quiz-ready thinking.",
+    "Exactly right. Keep this pace going.",
+    "Nailed it.",
+    "That's it — solid work.",
+    "Correct! One more theorem locked in.",
+    "Great job — that's the right approach.",
+    "Yes, perfect. On to the next one.",
+    "Right on target."
+  ];
+
+  // ---------- state ----------
+
+  var state = { topic: 'mixed', problems: [], index: 0, score: 0, streak: 0, bestStreak: 0, startTime: 0, answered: false };
+  var ROUND_LEN = 12;
+
+  // ---------- DOM refs ----------
+
+  var setupScreen = document.getElementById('setup-screen');
+  var practiceScreen = document.getElementById('practice-screen');
+  var summaryScreen = document.getElementById('summary-screen');
+
+  var topicGrid = document.getElementById('topic-grid');
+  var startBtn = document.getElementById('start-btn');
+
+  var progressLabel = document.getElementById('progress-label');
+  var scoreLabel = document.getElementById('score-label');
+  var streakLabel = document.getElementById('streak-label');
+  var progressFill = document.getElementById('progress-fill');
+
+  var problemTopicLabel = document.getElementById('problem-topic-label');
+  var diagramHolder = document.getElementById('diagram-holder');
+  var problemText = document.getElementById('problem-text');
+  var answerForm = document.getElementById('answer-form');
+  var answerInput = document.getElementById('answer-input');
+  var submitBtn = document.getElementById('submit-btn');
+
+  var feedback = document.getElementById('feedback');
+  var feedbackHeadline = document.getElementById('feedback-headline');
+  var feedbackExplain = document.getElementById('feedback-explain');
+  var nextBtn = document.getElementById('next-btn');
+  var menuBtn = document.getElementById('menu-btn');
+
+  var summaryTitle = document.getElementById('summary-title');
+  var summarySub = document.getElementById('summary-sub');
+  var summaryScore = document.getElementById('summary-score');
+  var summaryAccuracy = document.getElementById('summary-accuracy');
+  var summaryTime = document.getElementById('summary-time');
+  var againBtn = document.getElementById('again-btn');
+  var changeBtn = document.getElementById('change-btn');
+
+  topicGrid.addEventListener('click', function (e) {
+    var btn = e.target.closest('.choice-btn');
+    if (!btn) return;
+    Array.prototype.forEach.call(topicGrid.querySelectorAll('.choice-btn'), function (b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    state.topic = btn.getAttribute('data-topic');
+  });
+
+  startBtn.addEventListener('click', startRound);
+  againBtn.addEventListener('click', startRound);
+  changeBtn.addEventListener('click', function () {
+    summaryScreen.classList.add('hidden');
+    setupScreen.classList.remove('hidden');
+  });
+
+  menuBtn.addEventListener('click', function () {
+    practiceScreen.classList.add('hidden');
+    setupScreen.classList.remove('hidden');
+  });
+
+  function startRound() {
+    state.problems = [];
+    for (var i = 0; i < ROUND_LEN; i++) state.problems.push(generateProblem(state.topic));
+    state.index = 0; state.score = 0; state.streak = 0; state.bestStreak = 0; state.startTime = Date.now();
+
+    setupScreen.classList.add('hidden');
+    summaryScreen.classList.add('hidden');
+    practiceScreen.classList.remove('hidden');
+
+    renderProblem();
+  }
+
+  function renderProblem() {
+    state.answered = false;
+    var p = state.problems[state.index];
+
+    progressLabel.textContent = 'Problem ' + (state.index + 1) + ' of ' + ROUND_LEN;
+    scoreLabel.textContent = state.score;
+    streakLabel.textContent = '🔥 ' + state.streak;
+    progressFill.style.width = (state.index / ROUND_LEN * 100) + '%';
+
+    problemTopicLabel.textContent = p.topic;
+    diagramHolder.innerHTML = p.svg;
+    problemText.textContent = p.prompt;
+
+    feedback.classList.remove('show', 'correct', 'incorrect');
+    nextBtn.classList.add('hidden');
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Check';
+
+    answerInput.value = '';
+    answerInput.disabled = false;
+    answerInput.focus();
+  }
+
+  answerForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (state.answered) { advance(); return; }
+    checkAnswer();
+  });
+
+  nextBtn.addEventListener('click', advance);
+
+  function checkAnswer() {
+    var p = state.problems[state.index];
+    var v = parseFloat(answerInput.value);
+    var correct = (!isNaN(v) && Math.abs(v - p.answer) < 0.01);
+
+    state.answered = true;
+    answerInput.disabled = true;
+    submitBtn.disabled = true;
+
+    feedback.classList.add('show');
+    if (correct) {
+      state.score++; state.streak++;
+      if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+      feedback.classList.add('correct'); feedback.classList.remove('incorrect');
+      feedbackHeadline.textContent = pick(ENCOURAGEMENTS);
+    } else {
+      state.streak = 0;
+      feedback.classList.add('incorrect'); feedback.classList.remove('correct');
+      feedbackHeadline.textContent = 'Not quite — the answer is ' + p.answer + '.';
+    }
+    feedbackExplain.innerHTML = p.explain;
+
+    scoreLabel.textContent = state.score;
+    streakLabel.textContent = '🔥 ' + state.streak;
+
+    nextBtn.classList.remove('hidden');
+    nextBtn.textContent = (state.index === ROUND_LEN - 1) ? 'See results →' : 'Next problem →';
+    nextBtn.focus();
+  }
+
+  function advance() {
+    state.index++;
+    if (state.index >= ROUND_LEN) showSummary(); else renderProblem();
+  }
+
+  function showSummary() {
+    practiceScreen.classList.add('hidden');
+    summaryScreen.classList.remove('hidden');
+    progressFill.style.width = '100%';
+
+    var elapsed = Math.round((Date.now() - state.startTime) / 1000);
+    var mm = Math.floor(elapsed / 60), ss = elapsed % 60;
+    var accuracy = Math.round((state.score / ROUND_LEN) * 100);
+
+    summaryScore.textContent = state.score + '/' + ROUND_LEN;
+    summaryAccuracy.textContent = accuracy + '%';
+    summaryTime.textContent = mm + ':' + (ss < 10 ? '0' : '') + ss;
+
+    if (accuracy === 100) {
+      summaryTitle.textContent = 'Perfect round.';
+      summarySub.textContent = 'All ' + ROUND_LEN + ' correct. You are ready for tomorrow. Best streak: ' + state.bestStreak + '.';
+    } else if (accuracy >= 80) {
+      summaryTitle.textContent = 'Strong work.';
+      summarySub.textContent = 'That is a quiz-ready score. Best streak: ' + state.bestStreak + '. Run one more round on any theorem that tripped you up.';
+    } else if (accuracy >= 50) {
+      summaryTitle.textContent = 'Good progress.';
+      summarySub.textContent = 'Getting there — read the explanations on the ones you missed, then try again. Best streak: ' + state.bestStreak + '.';
+    } else {
+      summaryTitle.textContent = 'Keep going.';
+      summarySub.textContent = 'Try picking one theorem at a time from the focus menu instead of Mixed — it is easier to build confidence one at a time.';
+    }
+  }
+
+  answerInput.addEventListener('input', function () {
+    answerInput.value = answerInput.value.replace(/[^0-9.\-]/g, '');
+  });
+})();
+</script>
+</body>
+</html>
